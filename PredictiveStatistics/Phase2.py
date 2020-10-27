@@ -64,8 +64,13 @@ out_val = out_13
 in_test = np.concatenate((in_14, in_15))
 out_test = np.concatenate((out_14, out_15))
 
-model = LinearRegression().fit(in_train, out_train)
-predictions = model.predict(in_val)
+in_combined = np.concatenate((in_train, in_val))
+out_combined = np.concatenate((out_train, out_val))
+
+
+
+model = LinearRegression().fit(in_combined, out_combined)
+predictions = model.predict(in_test)
 
 SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
 MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
