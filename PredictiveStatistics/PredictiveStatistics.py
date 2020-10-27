@@ -2,6 +2,8 @@ import tensorflow as tf
 from tensorflow import keras
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import imread, imshow, subplots, show
 
 def normalize(array):
 	a_min = []
@@ -55,13 +57,35 @@ def data():
 
 def model():
 	model = keras.models.Sequential()
-	model.add(Dense(9, input_dim=13, kernel_initializer='normal', activation='relu'))
-	model.add(Dense(1, kernel_initializer='normal'))
+	model.add(keras.layers.Dense(9, input_dim=9, kernel_initializer='normal', activation='relu'))
+	model.add(keras.layers.Dense(1, kernel_initializer='normal'))
 	model.compile(loss='mean_squared_error', optimizer='adam')
 	
 	return model
 
 in_11, out_11, in_12, out_12, in_13, out_13, in_14, out_14, in_15, out_15, in_all, out_all = data()
+print('Data loaded')
 
+in_train = np.concatenate((in_11, in_12))
+out_train = np.concatenate((out_11, out_12))
+in_val = in_13
+out_val = out_13
+in_test = np.concatenate((in_14, in_15))
+out_test = np.concatenate((out_14, out_15))
 
+model = model()
+model.summary()
+history = model.fit(in_train, out_train, epochs = 1, validation_data=(in_val, out_val))
+test_loss, test_acc = model.evaluate(in_test, out_test, verbose=1)
 
+#plot
+plt.plot(history.history['loss'], label='loss')
+plt.plot(history.history['val_loss'], label = 'val_loss')
+plt.plot(history.history['acc'], label = 'acc')
+plt.plot(history.history['val_acc'], label = 'val_acc')
+plt.xlabel('Epoch')
+plt.ylabel('loss')
+plt.ylabel('acc')
+plt.ylim([0.00, 1.00])
+plt.legend(loc='lower right')
+plt.show() 
