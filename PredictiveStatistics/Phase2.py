@@ -67,8 +67,6 @@ out_test = np.concatenate((out_14, out_15))
 model = LinearRegression().fit(in_train, out_train)
 predictions = model.predict(in_val)
 
-predictions = model.predict(in_test)
-
 SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
 MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
 RR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
