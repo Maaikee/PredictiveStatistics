@@ -67,9 +67,6 @@ out_test = np.concatenate((out_14, out_15))
 model = LinearRegression().fit(in_train, out_train)
 predictions = model.predict(in_val)
 
-model.coef_[7] = model.coef_[7]*model.coef_[8]
-model.coef_[8] = model.coef_[7]*model.coef_[8]
-
 predictions = model.predict(in_test)
 
 SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
