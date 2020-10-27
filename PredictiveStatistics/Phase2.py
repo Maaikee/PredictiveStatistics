@@ -1,3 +1,4 @@
+
 import pandas as pd
 import numpy as np
 import sklearn, scipy
@@ -66,17 +67,9 @@ out_test = np.concatenate((out_14, out_15))
 model = LinearRegression().fit(in_train, out_train)
 predictions = model.predict(in_val)
 
-SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+model.coef_[7] = model.coef_[7]*model.coef_[8]
+model.coef_[8] = model.coef_[7]*model.coef_[8]
 
-print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
-print(f'Weights: {model.coef_}')
-
-in_combined = np.concatenate((in_train, in_val))
-out_combined = np.concatenate((out_train, out_val))
-
-model = LinearRegression().fit(in_combined, out_combined)
 predictions = model.predict(in_test)
 
 SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
