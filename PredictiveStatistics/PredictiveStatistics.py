@@ -1,10 +1,8 @@
-import tensorflow as tf
-from tensorflow import keras
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import imread, imshow, subplots, show
-
+import sklearn, scipy
+from sklearn.metrics import mean_absolute_error
+from sklearn.linear_model import LinearRegression
 def normalize(array):
 	a_min = []
 	a_max = []
@@ -55,14 +53,6 @@ def data():
 
 	return in_11, out_11, in_12, out_12, in_13, out_13, in_14, out_14, in_15, out_15, in_all, out_all
 
-def model():
-	model = keras.models.Sequential()
-	model.add(keras.layers.Dense(9, input_dim=9, kernel_initializer='normal', activation='relu'))
-	model.add(keras.layers.Dense(1, kernel_initializer='normal'))
-	model.compile(loss='mean_squared_error', optimizer='adam')
-	
-	return model
-
 in_11, out_11, in_12, out_12, in_13, out_13, in_14, out_14, in_15, out_15, in_all, out_all = data()
 print('Data loaded')
 
@@ -73,19 +63,11 @@ out_val = out_13
 in_test = np.concatenate((in_14, in_15))
 out_test = np.concatenate((out_14, out_15))
 
-model = model()
-model.summary()
-history = model.fit(in_train, out_train, epochs = 1, validation_data=(in_val, out_val))
-test_loss, test_acc = model.evaluate(in_test, out_test, verbose=1)
+model = LinearRegression().fit(in_train, out_train)
+predictions = model.predict(in_test)
 
-#plot
-plt.plot(history.history['loss'], label='loss')
-plt.plot(history.history['val_loss'], label = 'val_loss')
-plt.plot(history.history['acc'], label = 'acc')
-plt.plot(history.history['val_acc'], label = 'val_acc')
-plt.xlabel('Epoch')
-plt.ylabel('loss')
-plt.ylabel('acc')
-plt.ylim([0.00, 1.00])
-plt.legend(loc='lower right')
-plt.show() 
+SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+RR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
+
+print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
