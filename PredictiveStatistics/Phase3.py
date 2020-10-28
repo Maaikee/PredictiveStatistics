@@ -81,6 +81,11 @@ def split(in_arr, out_arr):
 	split_in.append(in_arr[(9*val) + (len(in_arr) - 10*val) : len(in_arr)])
 	split_out.append(out_arr[((9*val)) + (len(out_arr) - 10*val): len(out_arr)])
 
+	print(type(split_in))
+	split_in = np.array(split_in)
+	split_out = np.array(split_out)
+	print(type(split_in[0]))
+
 	return split_in, split_out 
 
 in_11, out_11, in_12, out_12, in_13, out_13, in_14, out_14, in_15, out_15, in_all, out_all = data()
@@ -89,31 +94,28 @@ print('Data loaded')
 in_train = np.concatenate((in_11, in_12))
 out_train = np.concatenate((out_11, out_12))
 
-#split the necessary arrays into 10
+# split the necessary arrays into 10
 in_13, out_13 = split(in_13, out_13)
 in_14, out_14 = split(in_14, out_14)
 in_15, out_15 = split(in_15, out_15)
 
-model = LinearRegression().fit(in_train, out_train)
-predictions = model.predict(in_val)
+# predict on blocks of the validation set
+for i in range(-1,9):
+	if i != -1:
+		in_block = np.array(in_13[i])
+		out_block = np.array(out_13[i])
+		in_train = np.concatenate(in_train, in_block)
+		out_train = np.concatenate(out_train, out_block)	
+	in_test, out_test = in_13[i + 1], out_13[i + 1] 
 
-SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+	model = LinearRegression().fit(in_train, out_train)
+	predictions = predictions = model.predict(in_test)
 
-print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
-print(f'Weights: {model.coef_}')
+	SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+	MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+	RR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
 
-in_combined = np.concatenate((in_train, in_val))
-out_combined = np.concatenate((out_train, out_val))
+	print('block:', i)
+	print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
+	#print(f'Weights: {model.coef_}')
 
-model = LinearRegression().fit(in_combined, out_combined)
-predictions = model.predict(in_test)
-
-SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
-MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
-RR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
-
-print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
-
-print(f'Weights: {model.coef_}')
