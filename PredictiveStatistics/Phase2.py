@@ -61,24 +61,30 @@ def combine_columns_div(ndarray, col1, col2):
 	for V in ndarray[:][col1]:
 		for W in ndarray[:][col2]:
 			teycdp.append(V / W)
-
-	ndarray = np.delete(ndarray, col2, 1)
+	if col1 > col2:
+		lastCol = col1
+	else:
+		lastCol = col2
+	ndarray = np.delete(ndarray, lastCol, 1)
 	i = 0
 	for T in teycdp:
-		ndarray[col1, i] = T
+		ndarray[i, col1] = T
 		++i
 	return ndarray
 
 def combine_columns_mult(ndarray, col1, col2):
 	teycdp = []
-	for V in ndarray[col1]:
-		for W in ndarray[col2]:
+	for V in ndarray[:][col1]:
+		for W in ndarray[:][col2]:
 			teycdp.append(V * W)
-
-	ndarray = np.delete(ndarray, col2, 1)
+	if col1 > col2:
+		lastCol = col1
+	else:
+		lastCol = col2
+	ndarray = np.delete(ndarray, lastCol, 1)
 	i = 0
 	for T in teycdp:
-		ndarray[col1, i] = T
+		ndarray[i, col1] = T
 		++i
 	return ndarray
 
@@ -87,8 +93,10 @@ print('Data loaded')
 
 in_train = np.concatenate((in_11, in_12))
 out_train = np.concatenate((out_11, out_12))
+
 in_val = in_13
 out_val = out_13
+
 in_test = np.concatenate((in_14, in_15))
 out_test = np.concatenate((out_14, out_15))
 
