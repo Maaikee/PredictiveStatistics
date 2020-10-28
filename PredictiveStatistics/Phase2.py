@@ -309,10 +309,20 @@ orirr = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
 print(f'spearman correlation coefficient: {orisc}, mean absolute error: {orimae}, r squared: {orirr}')
 print(f'weights: {model.coef_}')
 
-print('mult')
-find_best_combo_mult(len(in_train[0])-1)
-print('div')
-find_best_combo_div(len(in_train[0])-1)
+model = LinearRegression().fit(in_combined, out_combined)
+predictions = model.predict(in_test)
+
+SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+RR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
+
+print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
+print(f'Weights: {model.coef_}')
+
+#print('mult')
+#find_best_combo_mult(len(in_train[0])-1)
+#print('div')
+#find_best_combo_div(len(in_train[0])-1)
 
 #hist(in_train, 'training set', 'original feature set')
 
