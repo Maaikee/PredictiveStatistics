@@ -26,6 +26,9 @@
     <Compile Include="Phase2.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Phase3.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PredictiveStatistics.py" />
   </ItemGroup>
   <ItemGroup>
