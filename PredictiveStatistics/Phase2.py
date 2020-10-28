@@ -314,7 +314,7 @@ find_best_combo_mult(len(in_train[0])-1)
 print('div')
 find_best_combo_div(len(in_train[0])-1)
 
-hist(in_train, 'training set', 'original feature set')
+#hist(in_train, 'training set', 'original feature set')
 
 
 
