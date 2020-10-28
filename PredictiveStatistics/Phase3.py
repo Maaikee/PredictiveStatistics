@@ -62,19 +62,24 @@ def data():
 
 def split(in_arr, out_arr):
 	val = math.floor(len(in_arr) / 10)
+	leftover = (len(in_arr) - 10*val)
+
 	split_in, split_out = [], []
+	extra = 0
+	prevind = 0
 
 	for i in range(1,10):
-		minind = (i - 1)* val
-		maxind = i * val
+		minind = prevind
+		maxind = minind + val
+		if leftover:
+			maxind += 1
+			leftover -= 1
+		prevind = maxind
 		split_in.append(in_arr[minind:maxind])
-		split_out.append(out_arr[minind:maxind])
-			
-	split_in.append(in_arr[(9*val):len(in_arr)])
-	split_out.append(out_arr[(9*val):len(out_arr)])
-
-	for i in range(10):
-		print(len(split_in[i][0]), len(split_out[i]))
+		split_out.append(out_arr[minind:maxind])	
+		
+	split_in.append(in_arr[(9*val) + (len(in_arr) - 10*val) : len(in_arr)])
+	split_out.append(out_arr[((9*val)) + (len(out_arr) - 10*val): len(out_arr)])
 
 	return split_in, split_out 
 
