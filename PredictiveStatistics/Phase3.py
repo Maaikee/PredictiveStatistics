@@ -99,6 +99,7 @@ in_15, out_15 = split(in_15, out_15)
 
 # predict on blocks of the validation set
 print("VALIDATION SET")
+total_SC, total_MAE, total_RR = 0, 0, 0
 for i in range(-1,9):
 	if i != -1:
 		in_block = np.array(in_13[i])
@@ -116,12 +117,18 @@ for i in range(-1,9):
 
 	#print('block:', i + 2)
 	print(f'{i + 2} & {SC} & {MAE} & {RR} \\\\ ')
+	total_SC += SC
+	total_MAE += MAE
+	total_RR += RR
 	#print(f'Weights: {model.coef_}')
+
+print(f'Combined & {round(total_SC / 10, 7)} & {round(total_MAE / 10, 7)} & {round(total_RR / 10, 7)}')
 
 print("TEST SET")
 
 # predicting on blocks of the test set
 in_test, out_test = np.concatenate((in_14, in_15)), np.concatenate((out_14, out_15))
+total_SC, total_MAE, total_RR = 0, 0, 0
 
 for i in range(-1,19):
 	if i != -1:
@@ -138,7 +145,11 @@ for i in range(-1,19):
 	MAE = round(mean_absolute_error(out_test_block, predictions, multioutput='uniform_average'), 7)
 	RR = round((scipy.stats.linregress(out_test_block, predictions.flatten()).rvalue)**2, 7)
 
+	total_SC += SC
+	total_MAE += MAE
+	total_RR += RR
 	#print('block:', i + 2)
 	#print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
 	print(f'{i + 2} & {SC} & {MAE} & {RR} \\\\ ')
 
+print(f'Combined & {round(total_SC / 20, 7)} & {round(total_MAE / 20, 7)} & {round(total_RR / 20, 7)}')
