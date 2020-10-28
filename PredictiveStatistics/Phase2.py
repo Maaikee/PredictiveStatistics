@@ -116,6 +116,7 @@ def hist(in_train, name_of_set, action):
 			sns.histplot(data=hist_data[c], bins=50, stat='probability', element="step", ax=axes[x,y], binrange=[-1,1])
 			axes[x,y].set_title(f'histogram for feature #{c}', fontweight='bold')
 			axes[x,y].set_xlabel('value of feature')
+			axes[x,y].set_ylim(0, 0.4)
 			y+=1
 			c+=1
 		x+=1
@@ -130,7 +131,73 @@ def hist(in_train, name_of_set, action):
 	#plt.show()
 
 
-def find_best_combo(max_columns):
+def find_best_combo_div(max_columns):
+	bestSC = oriSC
+	bestSC_i = -1
+	bestSC_j = -1
+	bestSC_MAE = oriMAE;
+	bestSC_RR = oriRR;
+
+	bestMAE = oriMAE
+	bestMAE_i = -1
+	bestMAE_j = -1
+	bestMAE_SC = oriSC;
+	bestMAE_RR = oriRR;
+
+	bestRR = oriRR
+	bestRR_i = -1
+	bestRR_j = -1
+	bestRR_MAE = oriMAE;
+	bestRR_SC = oriSC;
+
+	for i in range(max_columns):
+		for j in range(max_columns):
+			combo_train = combine_columns_div(in_train, i, j)
+			combo_val = combine_columns_div(in_val, i, j)
+			combo_test = combine_columns_div(in_test, i, j)
+
+			in_combined = np.concatenate((combo_train, combo_val))
+			out_combined = np.concatenate((out_train, out_val))
+
+			model = LinearRegression().fit(combo_train, out_train)
+			predictions = model.predict(combo_val)
+
+			SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
+			MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
+			RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+
+			if RR > bestRR:
+				bestRR = RR
+				bestRR_i = i
+				bestRR_j = j
+				bestRR_MAE = MAE
+				bestRR_SC = SC
+			if MAE < bestMAE:
+				bestMAE = MAE
+				bestMAE_i = i
+				bestMAE_j = j
+				bestMAE_RR = RR
+				bestMAE_SC = SC
+			if SC > bestSC:
+				bestSC = SC
+				bestSC_i = i
+				bestSC_j = j
+				bestSC_MAE = MAE
+				bestSC_RR = RR
+	if bestRR_i >= 0:
+		print(f'Best combo RR = {bestRR} is ({bestRR_i},{bestRR_j}). MAE = {bestRR_MAE}, SC = {bestRR_SC}')
+	else:
+		print(f'Unable to find an improvement for RR')
+	if bestMAE_i >= 0:
+		print(f'Best combo MAE = {bestMAE} is ({bestMAE_i},{bestMAE_j}). RR = {bestMAE_RR}, SC = {bestMAE_SC}')
+	else:
+		print(f'Unable to find an improvement for MAE')
+	if bestSC_i >= 0:
+		print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
+	else:
+		print(f'Unable to find an improvement for SC')
+
+def find_best_combo_mult(max_columns):
 	bestSC = oriSC
 	bestSC_i = -1
 	bestSC_j = -1
@@ -212,33 +279,73 @@ out_test = np.concatenate((out_14, out_15))
 in_combined = np.concatenate((in_train, in_val))
 out_combined = np.concatenate((out_train, out_val))
 
-in_train = combine_columns_mult(in_train,1, 3)
-in_val = combine_columns_mult(in_val,1, 3)
-in_test = combine_columns_mult(in_test,1, 3)
+#in_train = combine_columns_mult(in_train,2, 3)
+#in_val = combine_columns_mult(in_val,2, 3)
+#in_test = combine_columns_mult(in_test,2, 3)
+#in_combined = combine_columns_mult(in_combined, 2, 3)
 
-in_train = combine_columns_mult(in_train,4, 5)
-in_val = combine_columns_mult(in_val,4, 5)
-in_test = combine_columns_mult(in_test,4, 5)
+#in_train = combine_columns_mult(in_train,4, 5)
+#in_val = combine_columns_mult(in_val,4, 5)
+#in_test = combine_columns_mult(in_test,4, 5)
+#in_combined = combine_columns_mult(in_combined, 4, 5)
 
-in_train = combine_columns_mult(in_train,1, 3)
-in_val = combine_columns_mult(in_val,1, 3)
-in_test = combine_columns_mult(in_test,1, 3)
+#in_train = combine_columns_mult(in_train,3, 0)
+#in_val = combine_columns_mult(in_val,3, 0)
+#in_test = combine_columns_mult(in_test,3, 0)
+#in_combined = combine_columns_mult(in_combined, 3, 0)
 
+in_train = combine_columns_div(in_train,3, 6)
+in_val = combine_columns_div(in_val, 3, 6)
+in_test = combine_columns_div(in_test, 3, 6)
+in_combined = combine_columns_div(in_combined, 3, 6)
 
-model = LinearRegression().fit(in_train, out_train)
-predictions = model.predict(in_val)
+in_train = combine_columns_mult(in_train,4, 0)
+in_val = combine_columns_mult(in_val,4, 0)
+in_test = combine_columns_mult(in_test,4, 0)
+in_combined = combine_columns_mult(in_combined, 4, 0)
 
-oriSC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-oriMAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+in_train = combine_columns_mult(in_train,2, 3)
+in_val = combine_columns_mult(in_val,2, 3)
+in_test = combine_columns_mult(in_test,2, 3)
+in_combined = combine_columns_mult(in_combined, 2, 3)
+
+in_train = combine_columns_mult(in_train,1, 0)
+in_val = combine_columns_mult(in_val,1, 0)
+in_test = combine_columns_mult(in_test,1, 0)
+in_combined = combine_columns_mult(in_combined, 1, 0)
+
+#in_train = combine_columns_div(in_train,3, 0)
+#in_val = combine_columns_div(in_val, 3, 0)
+#in_test = combine_columns_div(in_test, 3, 0)
+#in_combined = combine_columns_div(in_combined, 3, 0)
+
+#model = LinearRegression().fit(in_train, out_train)
+#predictions = model.predict(in_val)
+
+#oriSC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
+#oriMAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
+#oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+
+#print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
+#print(f'Weights: {model.coef_}')
+
+#print('mult')
+#find_best_combo_mult(len(in_train[0])-1)
+#print('div')
+#find_best_combo_div(len(in_train[0])-1)
+
+#hist(in_train, 'in_train', 'mult23')
+#hist(in_val, 'in_val', 'mult23')
+
+model = LinearRegression().fit(in_combined, out_combined)
+predictions = model.predict(in_test)
+
+oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
 
 print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
 print(f'Weights: {model.coef_}')
-
-find_best_combo(len(in_train[0])-1)
-
-hist(in_train, 'in_train', 'mult13_45_13')
-hist(in_val, 'in_val', 'mult13_45_13')
 
 
 
