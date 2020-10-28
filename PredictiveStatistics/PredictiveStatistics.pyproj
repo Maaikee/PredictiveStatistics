@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>92919acd-f0c8-4ba3-b17c-e71281fcadb4</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Phase2.py</StartupFile>
+    <StartupFile>Phase1_Phase2.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,10 +23,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Phase2.py">
+    <Compile Include="FeatureEngineering.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="PredictiveStatistics.py" />
+    <Compile Include="Phase3.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Phase1_Phase2.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.6" />
