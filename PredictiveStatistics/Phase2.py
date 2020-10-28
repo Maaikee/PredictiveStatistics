@@ -59,13 +59,83 @@ def combine_columns(ndarray, col1, col2):
 	for V in ndarray[:][col1]:
 		for W in ndarray[:][col2]:
 			teycdp.append(V * W)
-
-	ndarray = np.delete(ndarray, col2, 1)
+	if col1 > col2:
+		lastCol = col1
+	else:
+		lastCol = col2
+	ndarray = np.delete(ndarray, lastCol, 1)
 	i = 0
 	for T in teycdp:
 		ndarray[i, col1] = T
 		++i
 	return ndarray
+
+def find_best_combo(max_columns):
+	bestSC = oriSC
+	bestSC_i = -1
+	bestSC_j = -1
+	bestSC_MAE = oriMAE;
+	bestSC_RR = oriRR;
+
+	bestMAE = oriMAE
+	bestMAE_i = -1
+	bestMAE_j = -1
+	bestMAE_SC = oriSC;
+	bestMAE_RR = oriRR;
+
+	bestRR = oriRR
+	bestRR_i = -1
+	bestRR_j = -1
+	bestRR_MAE = oriMAE;
+	bestRR_SC = oriSC;
+
+	for i in range(max_columns):
+		for j in range(max_columns):
+			combo_train = combine_columns(in_train, i, j)
+			combo_val = combine_columns(in_val, i, j)
+			combo_test = combine_columns(in_test, i, j)
+
+			in_combined = np.concatenate((combo_train, combo_val))
+			out_combined = np.concatenate((out_train, out_val))
+
+			model = LinearRegression().fit(combo_train, out_train)
+			predictions = model.predict(combo_val)
+
+			SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
+			MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
+			RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+
+			if RR > bestRR:
+				bestRR = RR
+				bestRR_i = i
+				bestRR_j = j
+				bestRR_MAE = MAE
+				bestRR_SC = SC
+			if MAE < bestMAE:
+				bestMAE = MAE
+				bestMAE_i = i
+				bestMAE_j = j
+				bestMAE_RR = RR
+				bestMAE_SC = SC
+			if SC > bestSC:
+				bestSC = SC
+				bestSC_i = i
+				bestSC_j = j
+				bestSC_MAE = MAE
+				bestSC_RR = RR
+	if bestRR_i >= 0:
+		print(f'Best combo RR = {bestRR} is ({bestRR_i},{bestRR_j}). MAE = {bestRR_MAE}, SC = {bestRR_SC}')
+	else:
+		print(f'Unable to find an improvement for RR')
+	if bestMAE_i >= 0:
+		print(f'Best combo MAE = {bestMAE} is ({bestMAE_i},{bestMAE_j}). RR = {bestMAE_RR}, SC = {bestMAE_SC}')
+	else:
+		print(f'Unable to find an improvement for MAE')
+	if bestSC_i >= 0:
+		print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
+	else:
+		print(f'Unable to find an improvement for SC')
+
 
 in_11, out_11, in_12, out_12, in_13, out_13, in_14, out_14, in_15, out_15, in_all, out_all = data()
 print('Data loaded')
@@ -92,132 +162,20 @@ oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
 print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
 print(f'Weights: {model.coef_}')
 
-bestSC = oriSC
-bestSC_i = -1
-bestSC_j = -1
-bestSC_MAE = oriMAE;
-bestSC_RR = oriRR;
+find_best_combo(8);
 
-bestMAE = oriMAE
-bestMAE_i = -1
-bestMAE_j = -1
-bestMAE_SC = oriSC;
-bestMAE_RR = oriRR;
-
-bestRR = oriRR
-bestRR_i = -1
-bestRR_j = -1
-bestRR_MAE = oriMAE;
-bestRR_SC = oriSC;
-
-for i in range(8):
-	for j in range(8):
-		print(f'Computing {i}, {j}')
-		combo_train = combine_columns(in_train, i, j)
-		combo_val = combine_columns(in_val, i, j)
-		combo_test = combine_columns(in_test, i, j)
-
-		in_combined = np.concatenate((combo_train, combo_val))
-		out_combined = np.concatenate((out_train, out_val))
-
-		model = LinearRegression().fit(combo_train, out_train)
-		predictions = model.predict(combo_val)
-
-		SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-		MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-		RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
-
-		if RR > bestRR:
-			bestRR = RR
-			bestRR_i = i
-			bestRR_j = j
-			bestRR_MAE = MAE
-			bestRR_SC = SC
-		if MAE < bestMAE:
-			bestMAE = MAE
-			bestMAE_i = i
-			bestMAE_j = j
-			bestMAE_RR = RR
-			bestMAE_SC = SC
-		if SC > bestSC:
-			bestSC = SC
-			bestSC_i = i
-			bestSC_j = j
-			bestSC_MAE = MAE
-			bestSC_RR = RR
-
-if i >= 0:
-	print(f'Best combo RR = {bestRR} is ({bestRR_i},{bestRR_j}). MAE = {bestRR_MAE}, SC = {bestRR_SC}')
-else:
-	print(f'Unable to find an improvement for RR')
-if i >= 0:
-	print(f'Best combo MAE = {bestMAE} is ({bestMAE_i},{bestMAE_j}). RR = {bestMAE_RR}, SC = {bestMAE_SC}')
-else:
-	print(f'Unable to find an improvement for MAE')
-if i >= 0:
-	print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
-else:
-	print(f'Unable to find an improvement for SC')
-
-
-in_train = combine_columns(in_train, 7, 3);
-in_val = combine_columns(in_val, 7, 3);
-in_test = combine_columns(in_test, 7, 3);
+in_train = combine_columns(in_train, 2, 3);
+in_val = combine_columns(in_val, 2, 3);
+in_test = combine_columns(in_test, 2, 3);
 	
 model = LinearRegression().fit(in_train, out_train)
-predictions = model.predict(in_val)
+predictions = model.predict(in_test)
 
-oriSC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-oriMAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
 
 print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
 print(f'Weights: {model.coef_}')
 
-for i in range(7):
-	for j in range(7):
-		combo_train = combine_columns(in_train, i, j)
-		combo_val = combine_columns(in_val, i, j)
-		combo_test = combine_columns(in_test, i, j)
-
-		in_combined = np.concatenate((combo_train, combo_val))
-		out_combined = np.concatenate((out_train, out_val))
-
-		model = LinearRegression().fit(combo_train, out_train)
-		predictions = model.predict(combo_val)
-
-		SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-		MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-		RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
-
-		if RR > bestRR:
-			bestRR = RR
-			bestRR_i = i
-			bestRR_j = j
-			bestRR_MAE = MAE
-			bestRR_SC = SC
-		if MAE < bestMAE:
-			bestMAE = MAE
-			bestMAE_i = i
-			bestMAE_j = j
-			bestMAE_RR = RR
-			bestMAE_SC = SC
-		if SC > bestSC:
-			bestSC = SC
-			bestSC_i = i
-			bestSC_j = j
-			bestSC_MAE = MAE
-			bestSC_RR = RR
-
-if i >= 0:
-	print(f'Best combo RR = {bestRR} is ({bestRR_i},{bestRR_j}). MAE = {bestRR_MAE}, SC = {bestRR_SC}')
-else:
-	print(f'Unable to find an improvement for RR')
-if i >= 0:
-	print(f'Best combo MAE = {bestMAE} is ({bestMAE_i},{bestMAE_j}). RR = {bestMAE_RR}, SC = {bestMAE_SC}')
-else:
-	print(f'Unable to find an improvement for MAE')
-if i >= 0:
-	print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
-else:
-	print(f'Unable to find an improvement for SC')
+find_best_combo(7);
