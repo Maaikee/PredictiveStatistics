@@ -58,7 +58,7 @@ def combine_columns(ndarray, col1, col2):
 	teycdp = []
 	for V in ndarray[col1]:
 		for W in ndarray[col2]:
-			teycdp.append(V / W)
+			teycdp.append(V * W)
 
 	ndarray = np.delete(ndarray, col2, 1)
 	i = 0
@@ -157,3 +157,17 @@ if i >= 0:
 	print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
 else:
 	print(f'Unable to find an improvement for SC')
+
+in_train = combine_columns(in_train, 7, 3);
+in_val = combine_columns(in_val, 7, 3);
+in_test = combine_columns(in_test, 7, 3);
+	
+model = LinearRegression().fit(in_train, out_train)
+predictions = model.predict(in_test)
+
+oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
+
+print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
+print(f'Weights: {model.coef_}')
