@@ -81,10 +81,8 @@ def split(in_arr, out_arr):
 	split_in.append(in_arr[(9*val) + (len(in_arr) - 10*val) : len(in_arr)])
 	split_out.append(out_arr[((9*val)) + (len(out_arr) - 10*val): len(out_arr)])
 
-	print(type(split_in))
 	split_in = np.array(split_in)
 	split_out = np.array(split_out)
-	print(type(split_in[0]))
 
 	return split_in, split_out 
 
@@ -100,22 +98,47 @@ in_14, out_14 = split(in_14, out_14)
 in_15, out_15 = split(in_15, out_15)
 
 # predict on blocks of the validation set
+print("VALIDATION SET")
 for i in range(-1,9):
 	if i != -1:
 		in_block = np.array(in_13[i])
 		out_block = np.array(out_13[i])
-		in_train = np.concatenate(in_train, in_block)
-		out_train = np.concatenate(out_train, out_block)	
+		in_train = np.concatenate((in_train, in_block))
+		out_train = np.concatenate((out_train, out_block))	
 	in_test, out_test = in_13[i + 1], out_13[i + 1] 
 
 	model = LinearRegression().fit(in_train, out_train)
 	predictions = predictions = model.predict(in_test)
 
-	SC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
-	MAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
-	RR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
+	SC = round(scipy.stats.spearmanr(out_test, predictions.flatten()).correlation, 7)
+	MAE = round(mean_absolute_error(out_test, predictions, multioutput='uniform_average'), 7)
+	RR = round((scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2, 7)
 
-	print('block:', i)
-	print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
+	#print('block:', i + 2)
+	print(f'{i + 2} & {SC} & {MAE} & {RR} \\\\ ')
 	#print(f'Weights: {model.coef_}')
+
+print("TEST SET")
+
+# predicting on blocks of the test set
+in_test, out_test = np.concatenate((in_14, in_15)), np.concatenate((out_14, out_15))
+
+for i in range(-1,19):
+	if i != -1:
+		in_block = np.array(in_test[i])
+		out_block = np.array(out_test[i])
+		in_train = np.concatenate((in_train, in_block))
+		out_train = np.concatenate((out_train, out_block))	
+	in_test_block, out_test_block = in_test[i + 1], out_test[i + 1] 
+
+	model = LinearRegression().fit(in_train, out_train)
+	predictions = predictions = model.predict(in_test_block)
+
+	SC = round(scipy.stats.spearmanr(out_test_block, predictions.flatten()).correlation, 7)
+	MAE = round(mean_absolute_error(out_test_block, predictions, multioutput='uniform_average'), 7)
+	RR = round((scipy.stats.linregress(out_test_block, predictions.flatten()).rvalue)**2, 7)
+
+	#print('block:', i + 2)
+	#print(f'Spearman Correlation Coefficient: {SC}, Mean Absolute Error: {MAE}, R Squared: {RR}')
+	print(f'{i + 2} & {SC} & {MAE} & {RR} \\\\ ')
 
