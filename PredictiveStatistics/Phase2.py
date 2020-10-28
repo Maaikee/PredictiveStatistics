@@ -1,9 +1,9 @@
-
 import pandas as pd
 import numpy as np
 import sklearn, scipy
 from sklearn.metrics import mean_absolute_error
 from sklearn.linear_model import LinearRegression
+
 def normalize(array):
 	a_min = []
 	a_max = []
@@ -166,11 +166,12 @@ print(f'Weights: {model.coef_}')
 print(f'Original Model Performance: Test set')
 predictions = model.predict(in_test)
 
-oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+oriSC, pvalue = scipy.stats.spearmanr(out_test, predictions.flatten())
 oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
 oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
 
 print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
+print(f'P-value: {pvalue}')
 print(f'Weights: {model.coef_}')
 
 find_best_combo(8);
