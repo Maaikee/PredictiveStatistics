@@ -157,3 +157,45 @@ if i >= 0:
 	print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
 else:
 	print(f'Unable to find an improvement for SC')
+
+def hist(in_train, name_of_set, action):
+	j=0
+	hist_data = []
+	sns.set_theme()
+	sns.set_context("paper")
+	sns.color_palette('pastel')
+	f, axes = plt.subplots(int(len(in_train[0])/3+0.67), 3, figsize=(15, 10/3), sharex=True, sharey=True)
+	for C in in_train[:]:
+		i=0	
+		feature = []
+		for R in in_train:		
+			feature.append(R[j])			
+			i+=1	
+	
+		hist_data.append(feature)
+		j+=1
+		if j > len(in_train[0])-1:
+			break
+	x, c = 0, 0
+	while x < int(len(in_train[0])/3+0.67):
+		y=0
+		while y < 3:
+			if c > len(hist_data)-1:
+				break
+			plt.xlabel('data')
+			sns.histplot(data=hist_data[c], bins=50, stat='probability', element="step", ax=axes[x,y], binrange=[-1,1])
+			axes[x,y].set_title(f'histogram for feature #{c}', fontweight='bold')
+			axes[x,y].set_xlabel('value of feature')
+			axes[x,y].set_ylim(0, 0.4)
+			y+=1
+			c+=1
+		x+=1
+	
+	plt.suptitle(f'histograms of the {name_of_set} for {action}')
+
+	fig = plt.gcf()
+	location = os.path.join('C:\\Users\\kikih\\Documents\\SP_assignment_5')
+	os.makedirs(location, exist_ok=True)
+	filename = os.path.join(location, str('histogram' + '_' + name_of_set +  '_' + action + '.png'))
+	fig.savefig(filename, bbox_inches='tight')
+	#plt.show()
