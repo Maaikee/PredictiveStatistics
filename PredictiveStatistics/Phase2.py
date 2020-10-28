@@ -159,6 +159,17 @@ oriSC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
 oriMAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
 oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
 
+print(f'Original Model Performance: Validation set')
+print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
+print(f'Weights: {model.coef_}')
+
+print(f'Original Model Performance: Test set')
+predictions = model.predict(in_test)
+
+oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
+oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
+oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
+
 print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
 print(f'Weights: {model.coef_}')
 
