@@ -121,7 +121,7 @@ def hist(in_train, name_of_set, action):
 			c+=1
 		x+=1
 	
-	plt.suptitle(f'histograms for {name_of_set} {action}')
+	plt.suptitle(f'histograms of the {name_of_set} for {action}')
 
 	fig = plt.gcf()
 	location = os.path.join('C:\\Users\\kikih\\Documents\\SP_assignment_5')
@@ -279,21 +279,6 @@ out_test = np.concatenate((out_14, out_15))
 in_combined = np.concatenate((in_train, in_val))
 out_combined = np.concatenate((out_train, out_val))
 
-#in_train = combine_columns_mult(in_train,2, 3)
-#in_val = combine_columns_mult(in_val,2, 3)
-#in_test = combine_columns_mult(in_test,2, 3)
-#in_combined = combine_columns_mult(in_combined, 2, 3)
-
-#in_train = combine_columns_mult(in_train,4, 5)
-#in_val = combine_columns_mult(in_val,4, 5)
-#in_test = combine_columns_mult(in_test,4, 5)
-#in_combined = combine_columns_mult(in_combined, 4, 5)
-
-#in_train = combine_columns_mult(in_train,3, 0)
-#in_val = combine_columns_mult(in_val,3, 0)
-#in_test = combine_columns_mult(in_test,3, 0)
-#in_combined = combine_columns_mult(in_combined, 3, 0)
-
 in_train = combine_columns_div(in_train,3, 6)
 in_val = combine_columns_div(in_val, 3, 6)
 in_test = combine_columns_div(in_test, 3, 6)
@@ -314,38 +299,23 @@ in_val = combine_columns_mult(in_val,1, 0)
 in_test = combine_columns_mult(in_test,1, 0)
 in_combined = combine_columns_mult(in_combined, 1, 0)
 
-#in_train = combine_columns_div(in_train,3, 0)
-#in_val = combine_columns_div(in_val, 3, 0)
-#in_test = combine_columns_div(in_test, 3, 0)
-#in_combined = combine_columns_div(in_combined, 3, 0)
+model = LinearRegression().fit(in_train, out_train)
+predictions = model.predict(in_val)
 
-#model = LinearRegression().fit(in_train, out_train)
-#predictions = model.predict(in_val)
+orisc = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
+orimae = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
+orirr = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
 
-#oriSC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
-#oriMAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
-#oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+print(f'spearman correlation coefficient: {orisc}, mean absolute error: {orimae}, r squared: {orirr}')
+print(f'weights: {model.coef_}')
 
-#print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
-#print(f'Weights: {model.coef_}')
+print('mult')
+find_best_combo_mult(len(in_train[0])-1)
+print('div')
+find_best_combo_div(len(in_train[0])-1)
 
-#print('mult')
-#find_best_combo_mult(len(in_train[0])-1)
-#print('div')
-#find_best_combo_div(len(in_train[0])-1)
+hist(in_train, 'training set', 'original feature set')
 
-#hist(in_train, 'in_train', 'mult23')
-#hist(in_val, 'in_val', 'mult23')
-
-model = LinearRegression().fit(in_combined, out_combined)
-predictions = model.predict(in_test)
-
-oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
-oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
-oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
-
-print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
-print(f'Weights: {model.coef_}')
 
 
 
