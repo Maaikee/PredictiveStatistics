@@ -56,14 +56,14 @@ def data():
 
 def combine_columns(ndarray, col1, col2):
 	teycdp = []
-	for V in ndarray[col1]:
-		for W in ndarray[col2]:
+	for V in ndarray[:][col1]:
+		for W in ndarray[:][col2]:
 			teycdp.append(V * W)
 
 	ndarray = np.delete(ndarray, col2, 1)
 	i = 0
 	for T in teycdp:
-		ndarray[col1, i] = T
+		ndarray[i, col1] = T
 		++i
 	return ndarray
 
@@ -112,6 +112,7 @@ bestRR_SC = oriSC;
 
 for i in range(8):
 	for j in range(8):
+		print(f'Computing {i}, {j}')
 		combo_train = combine_columns(in_train, i, j)
 		combo_val = combine_columns(in_val, i, j)
 		combo_test = combine_columns(in_test, i, j)
@@ -158,16 +159,65 @@ if i >= 0:
 else:
 	print(f'Unable to find an improvement for SC')
 
+
 in_train = combine_columns(in_train, 7, 3);
 in_val = combine_columns(in_val, 7, 3);
 in_test = combine_columns(in_test, 7, 3);
 	
 model = LinearRegression().fit(in_train, out_train)
-predictions = model.predict(in_test)
+predictions = model.predict(in_val)
 
-oriSC = scipy.stats.spearmanr(out_test, predictions.flatten()).correlation
-oriMAE = mean_absolute_error(out_test, predictions, multioutput='uniform_average')
-oriRR = (scipy.stats.linregress(out_test, predictions.flatten()).rvalue)**2
+oriSC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
+oriMAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
+oriRR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
 
 print(f'Spearman Correlation Coefficient: {oriSC}, Mean Absolute Error: {oriMAE}, R Squared: {oriRR}')
 print(f'Weights: {model.coef_}')
+
+for i in range(7):
+	for j in range(7):
+		combo_train = combine_columns(in_train, i, j)
+		combo_val = combine_columns(in_val, i, j)
+		combo_test = combine_columns(in_test, i, j)
+
+		in_combined = np.concatenate((combo_train, combo_val))
+		out_combined = np.concatenate((out_train, out_val))
+
+		model = LinearRegression().fit(combo_train, out_train)
+		predictions = model.predict(combo_val)
+
+		SC = scipy.stats.spearmanr(out_val, predictions.flatten()).correlation
+		MAE = mean_absolute_error(out_val, predictions, multioutput='uniform_average')
+		RR = (scipy.stats.linregress(out_val, predictions.flatten()).rvalue)**2
+
+		if RR > bestRR:
+			bestRR = RR
+			bestRR_i = i
+			bestRR_j = j
+			bestRR_MAE = MAE
+			bestRR_SC = SC
+		if MAE < bestMAE:
+			bestMAE = MAE
+			bestMAE_i = i
+			bestMAE_j = j
+			bestMAE_RR = RR
+			bestMAE_SC = SC
+		if SC > bestSC:
+			bestSC = SC
+			bestSC_i = i
+			bestSC_j = j
+			bestSC_MAE = MAE
+			bestSC_RR = RR
+
+if i >= 0:
+	print(f'Best combo RR = {bestRR} is ({bestRR_i},{bestRR_j}). MAE = {bestRR_MAE}, SC = {bestRR_SC}')
+else:
+	print(f'Unable to find an improvement for RR')
+if i >= 0:
+	print(f'Best combo MAE = {bestMAE} is ({bestMAE_i},{bestMAE_j}). RR = {bestMAE_RR}, SC = {bestMAE_SC}')
+else:
+	print(f'Unable to find an improvement for MAE')
+if i >= 0:
+	print(f'Best combo SC = {bestSC} is ({bestSC_i},{bestSC_j}). MAE = {bestSC_MAE}, RR = {bestSC_RR}')
+else:
+	print(f'Unable to find an improvement for SC')
